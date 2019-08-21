@@ -15,13 +15,14 @@ for i in range(10):
     code_text = bs4.BeautifulSoup(res.text, "html.parser")
 
     # find specific image url
-    a_tag = code_text.select('a[itemprop="image"]')                      # find <a> tag
-    image_url = a_tag[0].contents[1].contents[0].attrs['src'] + '.png'   # trace down the tree structure to get attribute 'src'
-    image_res = requests.get(image_url)                                  # download the image url and store in image_res obj.
-    image_res.raise_for_status()                                         # return 200 for a successful url download
+    img_tag = code_text.select('a[itemprop="image"]')[0].contents[1].contents[0]  # trace down the tree structure to get <img> tag
+    image_url = img_tag.attrs['src']                                              # get attribute 'src' as link
+    title_url = img_tag.attrs['alt']                                              # get attribute 'alt' as title
+    image_res = requests.get(image_url)                                           # download the image url and store in image_res obj.
+    image_res.raise_for_status()                                                  # return 200 for a successful url download
 
     # save image url
-    image_file = open(os.path.basename(image_url), 'wb')   # open the file in write binary mode by passing 'wb' in the second argument
+    image_file = open(title_url + '.png', 'wb')            # open the file in write binary mode by passing 'wb' in the second argument
     for chunk in image_res.iter_content(100000):           # each chunk of 100000 bytes of image_res returned from each iteration
         image_file.write(chunk)                            # write() returns the number of bytes as chunk written into image_file
     image_file.close()
